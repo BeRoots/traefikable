@@ -14,7 +14,7 @@
     service = "dashboard@internal"
     rule = "PathPrefix(`/`)"
     middlewares = ["authbasic"]
-  # create router for ping
+  # create router for ping allowed without tls throught 80 and 443 ports
   [http.routers.ping_router]
     entryPoints = ["traefik"]
     service = "ping@internal"
@@ -53,6 +53,7 @@
       stsIncludeSubdomains = true
       stsPreload = true
       stsSeconds = 31536000
+
 [tls]
   [tls.stores]
     [tls.stores.default]

@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # Debian slim Running openssl for self-signed certificates generation
+  # Debian slim Running openssl for self-signed certificates generation (DBMS secure connection + reverse proxy)
   tls:
     container_name: ${COMPOSE_PROJECT_NAME}-tls
     build:
@@ -88,13 +88,13 @@ services:
       - "traefik.http.routers.http_redirect_router.entrypoints=web"
       - "traefik.http.routers.http_redirect_router.tls=false"
       - "traefik.http.routers.http_redirect_router.middlewares=tls_middleware@file"
-      - "traefik.http.routers.http_redirect_router.service=noop@internal"
+      - "traefik.http.routers.http_redirect_router.service=http_redirect_service"
 #      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=80"
       # HTTPS ONLY
       - "traefik.http.routers.https_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.https_router.entrypoints=websecure"
       - "traefik.http.routers.https_router.tls=true"
-      - "traefik.http.routers.https_router.middlewares=tls_middleware@file,sec_headers_middleware@file"
+      - "traefik.http.routers.https_router.middlewares=sec_headers_middleware@file"
       - "traefik.http.routers.https_router.service=www_https_service"
       - "traefik.http.services.www_https_service.LoadBalancer.server.Port=443"
 

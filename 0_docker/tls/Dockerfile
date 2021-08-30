@@ -47,7 +47,7 @@ ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
 ENV OPENSSL_EMAIL_ADDRESS="/emailAddress=dev@example.localhost"
-ENV OPENSSL_SUBJ="/C=FR/ST=France/L=Rhône-Alpes Auvergne/O=Sebastien Deschamps/OU=development"
+ENV OPENSSL_SUBJ="/C=FR/ST=France/L=Rhône-Alpes Auvergne/O=Developpers/OU=development"
 ENV OPENSSL_CA="${OPENSSL_SUBJ}/CN=fake-CA${OPENSSL_EMAIL_ADDRESS}"
 ENV OPENSSL_SERVER="${OPENSSL_SUBJ}/CN=fake-server${OPENSSL_EMAIL_ADDRESS}"
 ENV OPENSSL_CLIENT="${OPENSSL_SUBJ}/CN=fake-client${OPENSSL_EMAIL_ADDRESS}"
