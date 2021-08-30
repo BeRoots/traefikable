@@ -1,0 +1,16 @@
+# [BEGIN Docker Project Commons]
+0_docker0_docker_volumes/*
+0_docker/0_docker_volumes/traefik/*
+0_docker/0_docker_volumes/tls/*
+!0_docker/0_docker_volumes/tls/certs
+0_docker/0_docker_volumes/tls/certs/*
+!.gitkeep
+# [END Docker Project Commons]
+
+# [BEGIN IDE and OS files]
+
+# [END IDE and OS files]
+
+# [BEGIN Project Specific Rules]
+
+# [END Project Specific Rules]

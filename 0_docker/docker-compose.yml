@@ -1,0 +1,102 @@
+version: "3.8"
+
+services:
+  # Debian slim Running openssl for self-signed certificates generation
+  tls:
+    container_name: ${COMPOSE_PROJECT_NAME}-tls
+    build:
+      context: ./tls
+      dockerfile: Dockerfile
+    restart: "no"
+    network_mode: "none"
+    volumes:
+      - type: bind
+        source: ./0_docker_volumes/tls/certs
+        target: /opt/certs
+
+  traefik:
+    container_name: ${COMPOSE_PROJECT_NAME}-traefik
+    image: "traefik:v2.4.13"
+    restart: always
+    domainname: traefik.localhost
+    hostname: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    networks:
+      - www-traefik
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./0_docker_volumes/traefik:/var/log/traefik
+      - type: bind
+        source: ./traefik/traefik.toml
+        target: /etc/traefik/traefik.toml
+        read_only: true
+      - type: bind
+        source: ./traefik/traefik_dynamic.toml
+        target: /etc/traefik/traefik_dynamic.toml
+        read_only: true
+      - type: bind
+        source: ./0_docker_volumes/tls/certs
+        target: /srv/certs
+        read_only: true
+
+  www:
+    container_name: ${COMPOSE_PROJECT_NAME}-www
+    image: php:7.4-apache-buster
+    command: sh -c "a2enmod ssl socache_shmcb headers rewrite && apache2-foreground"
+    restart: always
+    domainname: www.${COMPOSE_PROJECT_DOMAINNAME}
+    hostname: www
+    expose:
+      - 80
+      - 443
+####    ports:
+####      - 80:80
+####      - 443:443
+    networks:
+      - www-traefik
+    volumes:
+      - type: bind
+        source: ./www/000-default.conf
+        target: /etc/apache2/sites-available/000-default.conf
+        read_only: true
+      - type: bind
+        source: ./0_docker_volumes/tls/certs
+        target: /srv/certs
+        read_only: true
+      - type: bind
+        source: ../src/
+        target: /var/www/app
+        read_only: true
+      - type: bind
+        source: ../src-http/
+        target: /var/www/http
+        read_only: true
+    labels:
+      # HTTP ONLY
+      - "traefik.enable=true"
+      - "traefik.http.routers.http_router.rule=Host(`public.${COMPOSE_PROJECT_DOMAINNAME}`)"
+      - "traefik.http.routers.http_router.entrypoints=web"
+      - "traefik.http.routers.http_router.tls=false"
+      - "traefik.http.routers.http_router.priority=2000"
+      - "traefik.http.routers.http_router.service=www_http_service"
+      - "traefik.http.services.www_http_service.LoadBalancer.server.Port=80"
+      # HTTP REDIRECT
+      - "traefik.http.routers.http_redirect_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
+      - "traefik.http.routers.http_redirect_router.entrypoints=web"
+      - "traefik.http.routers.http_redirect_router.tls=false"
+      - "traefik.http.routers.http_redirect_router.middlewares=tls_middleware@file"
+      - "traefik.http.routers.http_redirect_router.service=noop@internal"
+#      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=80"
+      # HTTPS ONLY
+      - "traefik.http.routers.https_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
+      - "traefik.http.routers.https_router.entrypoints=websecure"
+      - "traefik.http.routers.https_router.tls=true"
+      - "traefik.http.routers.https_router.middlewares=tls_middleware@file,sec_headers_middleware@file"
+      - "traefik.http.routers.https_router.service=www_https_service"
+      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=443"
+
+networks:
+  www-traefik:
