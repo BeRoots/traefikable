@@ -23,7 +23,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     networks:
       - www-traefik
     volumes:
@@ -94,7 +93,7 @@ services:
       - "traefik.http.routers.https_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.https_router.entrypoints=websecure"
       - "traefik.http.routers.https_router.tls=true"
-      - "traefik.http.routers.https_router.middlewares=tls_middleware@file,sec_headers_middleware@file"
+      - "traefik.http.routers.https_router.middlewares=tls_middleware@file"
       - "traefik.http.routers.https_router.service=www_https_service"
       - "traefik.http.services.www_https_service.LoadBalancer.server.Port=443"
 

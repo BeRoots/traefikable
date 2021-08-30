@@ -100,7 +100,7 @@
 ################################################################
 
 # Enable API and dashboard
-[api]
+#[api]
 
   # Enable the API in insecure mode
   #
@@ -117,14 +117,14 @@
   # dashboard = false
 
   # Debug
-  debug = true
+  #debug = true
 
 ################################################################
 # Ping configuration
 ################################################################
 
 # Enable ping
-[ping]
+#[ping]
 
   # Name of the related entry point
   #

@@ -1,33 +1,11 @@
 [http]
   ################################################################
-  # Dashboard secure
-  ################################################################
-  # create router for api
-  [http.routers.api_router]
-    entryPoints = ["traefik"]
-    service = "api@internal"
-    rule = "PathPrefix(`/api`)"
-    middlewares = ["authbasic"]
-  # create router for dashboard
-  [http.routers.dashboard_router]
-    entryPoints = ["traefik"]
-    service = "dashboard@internal"
-    rule = "PathPrefix(`/`)"
-    middlewares = ["authbasic"]
-  # create router for ping
-  [http.routers.ping_router]
-    entryPoints = ["traefik"]
-    service = "ping@internal"
-    rule = "PathPrefix(`/ping`)"
-
-  ################################################################
   # Middleware
   ################################################################
   [http.middlewares]
     # create middleware to enable basic authentication (htpasswd -nB adm)
     [http.middlewares.authbasic.basicAuth]
       users=[
-       "adm:$2y$05$ycgJ/p/gHTpO9Mby2s9BZelz1pwhS1.DHk0HT1z5m8hzl.taGnCIC",
        "admin:$2y$05$m/DNEUenlOKATbB8EXjbbOZN1uDzuqnS/Fj0NRh5GMiJS8lPUjIEG"
       ]
     # create middleware to enable tls redirect scheme
@@ -35,59 +13,7 @@
       scheme = "https"
       permanent = true
 
-    # create middleware to enable tls redirect scheme
-    [http.middlewares.sec_headers_middleware.headers]
-      # Deny page loaded in an iframe
-      frameDeny = true
-      # XSS Limit attacks
-      browserXssFilter = true
-      # Browser not detect mime type to limit DBD Attacks
-      contentTypeNosniff = true
-
-      # Policies Headers
-      contentSecurityPolicy = "script-src 'self'; img-src 'self'"
-      referrerPolicy = "same-origin"
-      featurePolicy = "vibrate 'self'; geolocation 'self'; midi 'self'; notifications 'self'; push 'self'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; vibrate 'self'; fullscreen 'self'"
-
-      #HSTS
-      forceSTSHeader = true
-      stsIncludeSubdomains = true
-      stsPreload = true
-      stsSeconds = 31536000
-      #deprecated in favor of entry point redirection or RedirectSheme middleware# sslRedirect = true
-      #deprecated in favor of entry point redirection or RedirectSheme middleware# sslTemporaryRedirect = true
-      #deprecated in favor of the RedirectRegex middleware# sslForceHost = true
-      #deprecated in favor of the RedirectRegex middleware# sslHost = "${ENV_SSL_HOST}"
-
-####  [http.services.my_http_service.loadBalancer]
-####    [[http.services.my_http_service.loadBalancer.servers]]
-####      url = "https://localhost/"
-####    [http.services.my_http_service.loadBalancer.sticky.cookie]
-####      name = "tsticky_localhost"
-      #secure = true
-      #httpOnly = true
-      #sameSite = "none"
 [tls]
-#  [tls.options.default]
-#    minVersion = "VersionTLS13"
-#    sniStrict = false
-#    cipherSuites = [
-#      "ECDHE-ECDSA-AES128-GCM-SHA256",
-#      "ECDHE-RSA-AES128-GCM-SHA256",
-#      "ECDHE-ECDSA-AES256-GCM-SHA384",
-#      "ECDHE-RSA-AES256-GCM-SHA384",
-#      "ECDHE-ECDSA-CHACHA20-POLY1305",
-#      "ECDHE-RSA-CHACHA20-POLY1305",
-#      "DHE-RSA-AES128-GCM-SHA256",
-#      "DHE-RSA-AES256-GCM-SHA384"
-#    ]
-#    curvePreferences = ["CurveP521", "CurveP384"]
-#    preferServerCipherSuites = true
-    #alpnProtocols = ["h2", "http/1.1", "acme-tls/1"] NOT RECONIZED
-    #[tls.options.default.clientAuth]
-      # in PEM format. each file can contain multiple CAs.
-      #caFiles = ["tests/clientca1.crt", "tests/clientca2.crt"]
-      #clientAuthType = "RequireAndVerifyClientCert"
   [tls.stores]
     [tls.stores.default]
       [tls.stores.default.defaultCertificate]
