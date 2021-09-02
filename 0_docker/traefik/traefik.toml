@@ -24,11 +24,7 @@
 [entryPoints]
   [entryPoints.web]
     address = ":80"
-    [entryPoints.web.http.redirections]
-      [entryPoints.web.http.redirections.entryPoint]
-        to = "websecure"
-        scheme = "https"
-        priority = 1000
+
 
   [entryPoints.websecure]
     address = ":443"

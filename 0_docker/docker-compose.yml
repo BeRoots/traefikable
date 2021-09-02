@@ -41,6 +41,13 @@ services:
         source: ./0_docker_volumes/tls/certs
         target: /srv/certs
         read_only: true
+    labels:
+      # middleware redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # global redirect to https
+      - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.redirs.entrypoints=web"
+      - "traefik.http.routers.redirs.middlewares=redirect-to-https"
 
   www:
     container_name: ${COMPOSE_PROJECT_NAME}-www
@@ -79,17 +86,14 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.http_router.rule=Host(`public.${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.http_router.entrypoints=web"
-      - "traefik.http.routers.http_router.tls=false"
-      - "traefik.http.routers.http_router.priority=2000"
       - "traefik.http.routers.http_router.service=www_http_service"
       - "traefik.http.services.www_http_service.LoadBalancer.server.Port=80"
       # HTTP REDIRECT
       - "traefik.http.routers.http_redirect_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.http_redirect_router.entrypoints=web"
-      - "traefik.http.routers.http_redirect_router.tls=false"
       - "traefik.http.routers.http_redirect_router.middlewares=tls_middleware@file"
       - "traefik.http.routers.http_redirect_router.service=http_redirect_service"
-#      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=80"
+      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=80"
       # HTTPS ONLY
       - "traefik.http.routers.https_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.https_router.entrypoints=websecure"
