@@ -19,6 +19,11 @@
     entryPoints = ["traefik"]
     service = "ping@internal"
     rule = "PathPrefix(`/ping`)"
+  [http.routers.https_redirection_router]
+    entrypoints = ["web"]
+    service = "noop@internal"
+    rule = "hostregexp(`{host:.+}`)"
+    middlewares = ["redirect_to_https_middleware"]
 
 
   ################################################################
@@ -31,7 +36,7 @@
        "admin:$2y$05$m/DNEUenlOKATbB8EXjbbOZN1uDzuqnS/Fj0NRh5GMiJS8lPUjIEG"
       ]
     # create middleware to enable tls redirect scheme
-    [http.middlewares.tls_middleware.redirectScheme]
+    [http.middlewares.redirect_to_https_middleware.redirectScheme]
       scheme = "https"
       permanent = true
 
