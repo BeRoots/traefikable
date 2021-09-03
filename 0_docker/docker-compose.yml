@@ -82,25 +82,37 @@ services:
         target: /var/www/http
         read_only: true
     labels:
+
       # HTTP ONLY
       - "traefik.enable=true"
       - "traefik.http.routers.http_router.rule=Host(`public.${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.http_router.entrypoints=web"
+#      - "traefik.http.routers.http_router.tls=false"
+#      - "traefik.http.routers.http_router.priority=2000"
       - "traefik.http.routers.http_router.service=www_http_service"
       - "traefik.http.services.www_http_service.LoadBalancer.server.Port=80"
       # HTTP REDIRECT
       - "traefik.http.routers.http_redirect_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
       - "traefik.http.routers.http_redirect_router.entrypoints=web"
+#      - "traefik.http.routers.http_redirect_router.tls=false"
       - "traefik.http.routers.http_redirect_router.middlewares=tls_middleware@file"
-      - "traefik.http.routers.http_redirect_router.service=http_redirect_service"
+      - "traefik.http.routers.http_redirect_router.service=www_http_service"
       - "traefik.http.services.www_https_service.LoadBalancer.server.Port=80"
+#      # HTTPS ONLY
+#      - "traefik.http.routers.https_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
+#      - "traefik.http.routers.https_router.entrypoints=websecure"
+#      - "traefik.http.routers.https_router.tls=true"
+#      - "traefik.http.routers.https_router.middlewares=sec_headers_middleware@file"
+#      - "traefik.http.routers.https_router.service=www_https_service"
+#      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=443"
       # HTTPS ONLY
-      - "traefik.http.routers.https_router.rule=Host(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || Host(`${COMPOSE_PROJECT_DOMAINNAME}`)"
-      - "traefik.http.routers.https_router.entrypoints=websecure"
-      - "traefik.http.routers.https_router.tls=true"
-      - "traefik.http.routers.https_router.middlewares=sec_headers_middleware@file"
-      - "traefik.http.routers.https_router.service=www_https_service"
-      - "traefik.http.services.www_https_service.LoadBalancer.server.Port=443"
+      - "traefik.tcp.routers.https_router.rule=HostSNI(`www.${COMPOSE_PROJECT_DOMAINNAME}`) || HostSNI(`${COMPOSE_PROJECT_DOMAINNAME}`)"
+      - "traefik.tcp.routers.https_router.entrypoints=websecure"
+      - "traefik.tcp.routers.https_router.tls=true"
+      - "traefik.tcp.routers.https_router.tls.passthrough=true"      
+#      - "traefik.tcp.routers.https_router.middlewares=sec_headers_middleware@file"
+      - "traefik.tcp.routers.https_router.service=www_https_service"
+      - "traefik.tcp.services.www_https_service.LoadBalancer.server.Port=443"
 
 networks:
   www-traefik:
